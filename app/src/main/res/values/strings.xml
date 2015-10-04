@@ -24,5 +24,11 @@
     <string name="developer_name">Midhun Darvin</string>
     <string name="developer_email">midhunadarvin@gmail.com</string>
 
+    <string name="home_fragment">Home fragment</string>
+    <string name="profile_fragment">Profile fragment</string>
+    <string name="messages_fragment">Messages fragment</string>
+    <string name="music_fragment">Music fragment</string>
+    <string name="settings_fragment">Settings fragment</string>
+
 
 </resources>
