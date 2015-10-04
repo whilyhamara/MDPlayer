@@ -7,9 +7,12 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -68,6 +71,46 @@ public class MainActivity extends AppCompatActivity {
         }; // Drawer Toggle Object Made
         Drawer.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
+
+
+        final GestureDetector mGestureDetector = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
+                                                                    // Gesture detector to check for single taps,swipes,long taps in recycler view
+            @Override public boolean onSingleTapUp(MotionEvent e) {
+                return true;                                        // To get single tap events
+            }
+
+        });
+
+        // Set an onItemTouchListener to the navigation drawer
+
+        mNavigationView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(),motionEvent.getY());
+
+
+
+                if(child!=null && mGestureDetector.onTouchEvent(motionEvent)){
+                    //Drawer.closeDrawers();
+                    Toast.makeText(MainActivity.this,"The Item Clicked is: "+recyclerView.getChildLayoutPosition(child), Toast.LENGTH_SHORT).show();
+                    return true;
+
+                }
+
+
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
     }
 
     @Override
