@@ -2,8 +2,6 @@ package mdplayer.darvin.midhun.mdplayer;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,24 +34,41 @@ public class MainActivity extends AppCompatActivity {
 
     ActionBarDrawerToggle mDrawerToggle;
 
-    ViewPager viewPager;                                  //Declaring ViewPager
-    FragmentPagerAdapter adapterViewPager;                //PagerAdapter for switching fragments in the main view
+    HomeFragment homeFragment;
+    ProfileFragment profileFragment;
+    MessageFragment messageFragment;
+    MusicFragment musicFragment;
+    SettingsFragment settingsFragment;
+    FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Initializing the Fragments
+        homeFragment = new HomeFragment();
+        profileFragment = new ProfileFragment();
+        messageFragment = new MessageFragment();
+        musicFragment = new MusicFragment();
+        settingsFragment = new SettingsFragment();
+        fragmentManager = getSupportFragmentManager();
+
+        //Setting default Fragment
+        // Check that the activity is using the layout version with the fragment_container FrameLayout
+        if(findViewById(R.id.frame_container) != null)
+        {
+            // if we are being restored from a previous state, then we dont need to do anything and should
+            // return or else we could end up with overlapping fragments.
+            if(savedInstanceState != null)
+                return;
+
+            // add fragment to the fragment container layout
+            getSupportFragmentManager().beginTransaction().replace(R.id.frame_container, homeFragment);
+        }
+
         toolbar = (Toolbar) findViewById(R.id.tool_bar);                  //Setting toolbar for the activity
         setSupportActionBar(toolbar);
-
-
-
-        viewPager = (ViewPager) findViewById(R.id.viewPager);                  //Assigning ViewPager object to the xml
-        adapterViewPager = new MyPagerAdapter(getSupportFragmentManager());    //Creating new object of MyPageAdapter class
-        viewPager.setAdapter(adapterViewPager);                                //Setting the adapter of viewPager
-
-
 
 
         mNavigationView = (RecyclerView) findViewById(R.id.RecyclerView); // Assigning the RecyclerView Object to the xml View
@@ -107,27 +123,9 @@ public class MainActivity extends AppCompatActivity {
                 if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
                     Drawer.closeDrawers();
                     int itemClicked = recyclerView.getChildLayoutPosition(child);
-                    Toast.makeText(MainActivity.this, "The Item Clicked is: " + itemClicked, Toast.LENGTH_SHORT).show();
-
-                    switch (itemClicked) {
-                        case 1:{
-                            viewPager.setCurrentItem(itemClicked-1);
-                            break;
-                        }
-
-                        case 2:{
-                            viewPager.setCurrentItem(itemClicked-1);
-                            break;
-                        }
-
-                        case 3:{
-                            viewPager.setCurrentItem(itemClicked-1);
-                        }
-
-                        default:break;
-
-                    }
-
+                    //Toast.makeText(MainActivity.this, "The Item Clicked is: " + itemClicked, Toast.LENGTH_SHORT).show();
+                    // display view for selected nav drawer item
+                    displayView(itemClicked-1);
                     return true;
 
                 }
@@ -147,6 +145,38 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void displayView(int itemClicked) {
+        // update the main content by replacing fragments
+        Fragment fragment = null;
+        switch (itemClicked) {
+            case 0:
+                fragment = homeFragment;
+                break;
+            case 1:
+                fragment = profileFragment;
+                break;
+            case 2:
+                fragment = messageFragment;
+                break;
+            case 3:
+                fragment = musicFragment;
+                break;
+            case 4:
+                fragment = settingsFragment;
+                break;
+
+            default:
+                break;
+        }
+
+        if (fragment != null) {
+            fragmentManager.beginTransaction().replace(R.id.frame_container, fragment).commit();
+        } else {
+            // error in creating fragment
+            Log.e("MainActivity", "Error in creating fragment");
+        }
     }
 
     @Override
@@ -171,40 +201,4 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-    public static class MyPagerAdapter extends FragmentPagerAdapter {
-        private static int NUM_ITEMS = 3;
-
-        public MyPagerAdapter(FragmentManager fragmentManager) {
-            super(fragmentManager);
-        }
-
-        // Returns total number of pages
-        @Override
-        public int getCount() {
-            return NUM_ITEMS;
-        }
-
-        // Returns the fragment to display for that page
-        @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                case 0:
-                    return new HomeFragment();
-                case 1:
-                    return new ProfileFragment();
-                case 2:
-                    return new MessageFragment();
-                default:
-                    return null;
-            }
-        }
-
-        // Returns the page title for the top indicator
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return "Page " + position;
-        }
-
-    }
 }
