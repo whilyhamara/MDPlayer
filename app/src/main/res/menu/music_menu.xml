@@ -9,10 +9,10 @@
         android:title="Shuffle"/>
 
     <item
-        android:id="@+id/action_end"
-        android:icon="@drawable/ic_cancel"
+        android:id="@+id/action_sync"
+        android:icon="@drawable/ic_synchronize"
         android:orderInCategory="2"
         app:showAsAction="always"
-        android:title="End"/>
+        android:title="Sync"/>
 
 </menu>

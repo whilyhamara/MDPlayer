@@ -1,6 +1,7 @@
 package mdplayer.darvin.midhun.mdplayer;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,10 @@ public class SongAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View arg1, ViewGroup parent) {
         //map to song layout
-        LinearLayout songLay = (LinearLayout) songInf.inflate(R.layout.song_list_row, parent, false);
+        //LinearLayout songLay = (LinearLayout) songInf.inflate(R.layout.song_list_row, parent, false);
+
+        CardView songLay = (CardView) songInf.inflate(R.layout.song_list_row,parent,false);
+
         //get title and artist views
         TextView songView = (TextView)songLay.findViewById(R.id.song_title);
         TextView artistView = (TextView)songLay.findViewById(R.id.song_artist);
