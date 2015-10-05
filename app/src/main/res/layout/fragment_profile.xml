@@ -9,7 +9,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
         <ImageView
-            android:src="@drawable/ic_contacts_color"
+            android:src="@drawable/ic_profile_color"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
 
