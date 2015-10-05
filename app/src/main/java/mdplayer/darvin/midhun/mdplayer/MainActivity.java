@@ -54,18 +54,10 @@ public class MainActivity extends AppCompatActivity {
         settingsFragment = new SettingsFragment();
         fragmentManager = getSupportFragmentManager();
 
-        //Setting default Fragment
-        // Check that the activity is using the layout version with the fragment_container FrameLayout
-        if(findViewById(R.id.frame_container) != null)
-        {
-            // if we are being restored from a previous state, then we dont need to do anything and should
-            // return or else we could end up with overlapping fragments.
-            if(savedInstanceState != null)
-                return;
+        // add fragment to the fragment container layout
+        getSupportFragmentManager().beginTransaction().replace(R.id.frame_container, homeFragment);
 
-            // add fragment to the fragment container layout
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame_container, homeFragment);
-        }
+
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar);                  //Setting toolbar for the activity
         setSupportActionBar(toolbar);
