@@ -3,22 +3,20 @@
     android:layout_height="match_parent"
     tools:context="mdplayer.darvin.midhun.mdplayer.MusicFragment">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:gravity="center_vertical"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-        <ImageView
-            android:src="@drawable/ic_note1_color"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:background="#ffffff"
+        tools:context=".MainActivity" >
 
-        <TextView
-            android:layout_gravity="center"
-            android:gravity="center"
+        <ListView
+            android:id="@+id/song_list"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/music_fragment" />
+            android:layout_height="wrap_content" >
+        </ListView>
+
     </LinearLayout>
 
 </FrameLayout>
