@@ -31,6 +31,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onCreate() {
+        Log.e("check","service has started");
         //create the service
         super.onCreate();
         //initialize position

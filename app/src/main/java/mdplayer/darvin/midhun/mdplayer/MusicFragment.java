@@ -26,19 +26,11 @@ import java.util.Comparator;
 
 import mdplayer.darvin.midhun.mdplayer.Services.MusicService;
 
-
-/**
- * A simple {@link Fragment} subclass.
- */
 public class MusicFragment extends Fragment {
 
     Menu menu;
-    private ArrayList<Song> songList;
+    public ArrayList<Song> songList;
     private ListView songListView;
-
-    private MusicService musicSrv;
-    private Intent playIntent;
-    private boolean musicBound=false;
 
     public MusicFragment() {
         // Required empty public constructor
@@ -50,25 +42,6 @@ public class MusicFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
-    //connect to the service
-    private ServiceConnection musicConnection = new ServiceConnection(){
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MusicBinder binder = (MusicService.MusicBinder)service;
-            //get service
-            musicSrv = binder.getService();
-            //pass list
-            musicSrv.setList(songList);
-            musicBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicBound = false;
-        }
-    };
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -79,8 +52,7 @@ public class MusicFragment extends Fragment {
         songListView = (ListView) view.findViewById(R.id.song_list);
         songList = new ArrayList<Song>();
 
-
-        getSongList(getActivity());
+        songList = ((MainActivity) getActivity()).songList;
 
         Collections.sort(songList, new Comparator<Song>() {
             public int compare(Song a, Song b) {
@@ -94,49 +66,18 @@ public class MusicFragment extends Fragment {
         songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                MusicService musicSrv = ((MainActivity)getActivity()).musicSrv;
                 musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
                 musicSrv.playSong();
             }
         });
 
-        if(playIntent==null){
-            playIntent = new Intent(getActivity(), MusicService.class);
-            getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
-            getActivity().startService(playIntent);
-        }
-
         return view;
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.music_menu, menu);
         this.menu = menu;
-    }
-
-    public void getSongList(Context context) {
-        //retrieve song info
-        ContentResolver musicResolver = context.getContentResolver();
-        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
-
-        if(musicCursor!=null && musicCursor.moveToFirst()){
-            //get columns
-            int titleColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.TITLE);
-            int idColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media._ID);
-            int artistColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.ARTIST);
-            //add songs to list
-            do {
-                long thisId = musicCursor.getLong(idColumn);
-                String thisTitle = musicCursor.getString(titleColumn);
-                String thisArtist = musicCursor.getString(artistColumn);
-                songList.add(new Song(thisId, thisTitle, thisArtist));
-            }
-            while (musicCursor.moveToNext());
-        }
     }
 }
