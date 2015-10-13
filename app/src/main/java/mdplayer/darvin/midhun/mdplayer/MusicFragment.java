@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +32,8 @@ public class MusicFragment extends Fragment {
     Menu menu;
     public ArrayList<Song> songList;
     private ListView songListView;
-
+    private Intent playIntent;
+    private MusicService musicSrv;
     public MusicFragment() {
         // Required empty public constructor
     }
@@ -66,7 +68,6 @@ public class MusicFragment extends Fragment {
         songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                MusicService musicSrv = ((MainActivity)getActivity()).musicSrv;
                 musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
                 musicSrv.playSong();
             }
@@ -80,4 +81,34 @@ public class MusicFragment extends Fragment {
         inflater.inflate(R.menu.music_menu, menu);
         this.menu = menu;
     }
+
+    @Override
+    public void onStart() {
+        if(playIntent==null){
+            playIntent = new Intent(getActivity(), MusicService.class);
+            getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            getActivity().startService(playIntent);
+        }
+        super.onStart();
+    }
+
+
+    public ServiceConnection  musicConnection = new ServiceConnection(){
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+            //get service
+            musicSrv = binder.getService();
+            Log.d("check", "Service connected");
+            //pass list
+            musicSrv.setList(songList);
+//            musicBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+//            musicBound = false;
+        }
+    };
 }

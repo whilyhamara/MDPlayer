@@ -25,7 +25,6 @@
 
         <service
             android:name="mdplayer.darvin.midhun.mdplayer.Services.MusicService"
-            android:enabled="false"
             android:exported="false" >
         </service>
     </application>
