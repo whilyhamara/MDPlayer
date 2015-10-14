@@ -2,12 +2,9 @@ package mdplayer.darvin.midhun.mdplayer;
 
 
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -27,14 +24,17 @@ import java.util.Comparator;
 
 import mdplayer.darvin.midhun.mdplayer.Services.MusicService;
 
-public class MusicFragment extends Fragment {
+public class MusicFragment extends Fragment implements MediaController.MediaPlayerControl {
 
     Menu menu;
+    View view;
     public ArrayList<Song> songList;
     private ListView songListView;
     public MusicService musicSrv;
     private Intent playIntent;
     public boolean musicBound=false;
+
+    private MusicController controller;
 
     public MusicFragment() {
         // Required empty public constructor
@@ -51,7 +51,7 @@ public class MusicFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_music, container, false);
+        view = inflater.inflate(R.layout.fragment_music, container, false);
 
         songListView = (ListView) view.findViewById(R.id.song_list);
         songList = new ArrayList<Song>();
@@ -91,6 +91,7 @@ public class MusicFragment extends Fragment {
             getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             getActivity().startService(playIntent);
         }
+        setController();
         super.onStart();
     }
 
@@ -105,12 +106,106 @@ public class MusicFragment extends Fragment {
             Log.d("check", "Service connected");
             //pass list
             musicSrv.setList(songList);
-//            musicBound = true;
+            musicBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-//            musicBound = false;
+            musicBound = false;
         }
     };
+
+    @Override
+    public void pause() {
+        musicSrv.pausePlayer();
+    }
+
+    @Override
+    public void seekTo(int pos) {
+        musicSrv.seek(pos);
+    }
+
+    @Override
+    public void start() {
+        musicSrv.go();
+    }
+
+    @Override
+    public int getDuration() {
+        if(musicSrv!=null && musicBound && musicSrv.isPng())
+            return musicSrv.getDur();
+        else return 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        if(musicSrv!=null && musicBound && musicSrv.isPng())
+            return musicSrv.getPosn();
+        else return 0;
+    }
+
+    @Override
+    public boolean isPlaying() {
+        if(musicSrv!=null && musicBound)
+            return musicSrv.isPng();
+        return false;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+
+    private void setController(){
+        //set the controller up
+        controller = new MusicController(getActivity());
+
+        controller.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNext();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playPrev();
+            }
+        });
+        Log.e("check",view.findViewById(R.id.song_list).toString());
+        controller.setMediaPlayer(this);
+        controller.setAnchorView(view.findViewById(R.id.song_list));
+        controller.setEnabled(true);
+    }
+
+    //play next
+    private void playNext(){
+        musicSrv.playNext();
+        controller.show(0);
+    }
+
+    //play previous
+    private void playPrev(){
+        musicSrv.playPrev();
+        controller.show(0);
+    }
 }

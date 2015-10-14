@@ -1,5 +1,7 @@
 package mdplayer.darvin.midhun.mdplayer.Services;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -13,6 +15,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import mdplayer.darvin.midhun.mdplayer.MainActivity;
+import mdplayer.darvin.midhun.mdplayer.R;
 import mdplayer.darvin.midhun.mdplayer.Song;
 
 public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,MediaPlayer.OnCompletionListener{
@@ -23,6 +27,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     private ArrayList<Song> songs;
     //current position
     private int songPosn;
+    private String songTitle="";
+    private static final int NOTIFY_ID=1;
 
     private final IBinder musicBind = new MusicBinder();
 
@@ -80,6 +86,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         player.reset();
         //get song
         Song playSong = songs.get(songPosn);
+        //get song title
+        songTitle = playSong.getTitle();
         //get id
         long currSong = playSong.getID();
         //set uri
@@ -113,9 +121,68 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         //start playback
         player.start();
 
+        Intent notIntent = new Intent(this, MainActivity.class);
+        notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendInt = PendingIntent.getActivity(this, 0,
+                notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification.Builder builder = new Notification.Builder(this);
+
+        builder.setContentIntent(pendInt)
+                .setSmallIcon(R.drawable.ic_play)
+                .setTicker(songTitle)
+                .setOngoing(true)
+                .setContentTitle("Playing")
+        .setContentText(songTitle);
+        Notification not = builder.build();
+
+        startForeground(NOTIFY_ID, not);
+
     }
 
     public void setSong(int songIndex){
         songPosn=songIndex;
+    }
+
+    public int getPosn(){
+        return player.getCurrentPosition();
+    }
+
+    public int getDur(){
+        return player.getDuration();
+    }
+
+    public boolean isPng(){
+        return player.isPlaying();
+    }
+
+    public void pausePlayer(){
+        player.pause();
+    }
+
+    public void seek(int posn){
+        player.seekTo(posn);
+    }
+
+    public void go(){
+        player.start();
+    }
+
+    public void playPrev(){
+        songPosn--;
+        if(songPosn < 0) songPosn=songs.size()-1;
+        playSong();
+    }
+
+    //skip to next
+    public void playNext(){
+        songPosn++;
+        if(songPosn >= songs.size()) songPosn=0;
+        playSong();
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
     }
 }
