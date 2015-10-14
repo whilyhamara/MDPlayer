@@ -32,8 +32,10 @@ public class MusicFragment extends Fragment {
     Menu menu;
     public ArrayList<Song> songList;
     private ListView songListView;
+    public MusicService musicSrv;
     private Intent playIntent;
-    private MusicService musicSrv;
+    public boolean musicBound=false;
+
     public MusicFragment() {
         // Required empty public constructor
     }

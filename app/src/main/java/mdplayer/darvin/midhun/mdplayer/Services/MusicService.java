@@ -18,7 +18,7 @@ import mdplayer.darvin.midhun.mdplayer.Song;
 public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,MediaPlayer.OnCompletionListener{
 
     //media player
-    private MediaPlayer player;
+    public MediaPlayer player;
     //song list
     private ArrayList<Song> songs;
     //current position

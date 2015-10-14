@@ -54,9 +54,6 @@ public class MainActivity extends AppCompatActivity {
     FragmentManager fragmentManager;
 
     public ArrayList<Song> songList;
-    public MusicService musicSrv;
-    private Intent playIntent;
-    public boolean musicBound=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +61,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         songList = new ArrayList<Song>();
-//        musicSrv = new MusicService();
 
-
+        getSongList();
         //Initializing the Fragments
         homeFragment = new HomeFragment();
         profileFragment = new ProfileFragment();
@@ -161,32 +157,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-//        if(playIntent==null){
-//            playIntent = new Intent(this, MusicService.class);
-//            bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
-//            startService(playIntent);
-//        }
     }
-
-    //connect to the service
-//    public ServiceConnection  musicConnection = new ServiceConnection(){
-//
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
-//            //get service
-//            musicSrv = binder.getService();
-//            Log.d("check","Service connected");
-//            //pass list
-//            musicSrv.setList(songList);
-//            musicBound = true;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            musicBound = false;
-//        }
-//    };
 
     private void displayView(int itemClicked) {
         // update the main content by replacing fragments
