@@ -6,14 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -36,21 +34,13 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
     private Intent playIntent;
     public boolean musicBound=false;
 
+    public MusicController controller;
     private boolean paused=false, playbackPaused=false;
 
-    private MusicController controller;
-    private Handler handler = new Handler();
-
+    // Required empty public constructor
     public MusicFragment() {
-        // Required empty public constructor
-    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,27 +48,30 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_music, container, false);
 
-        songListView = (ListView) view.findViewById(R.id.song_list);
-        songList = new ArrayList<Song>();
+        songListView = (ListView) view.findViewById(R.id.song_list);        // Get reference of ListView in fragment_music layout
+        songList = new ArrayList<Song>();                                   // Create a new ArrayList of Song objects
+        songList = ((MainActivity) getActivity()).songList;                 // Get songs from MainActivity
 
-        songList = ((MainActivity) getActivity()).songList;
-
+        //Sorting the song list alphabetically
         Collections.sort(songList, new Comparator<Song>() {
             public int compare(Song a, Song b) {
                 return a.getTitle().compareTo(b.getTitle());
             }
         });
 
+        //Setting the songAdapter to the list View
         SongAdapter songAdt = new SongAdapter(getActivity(), songList);
         songListView.setAdapter(songAdt);
 
+        //Play the song when list item is clicked
         songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
-                musicSrv.playSong();
+                songPicked(view);
             }
         });
+
+        setController();
 
         return view;
     }
@@ -89,6 +82,16 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         this.menu = menu;
     }
 
+    public void songPicked(View view){
+        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
+        musicSrv.playSong();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
+
     @Override
     public void onStart() {
         if(playIntent==null){
@@ -96,7 +99,6 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
             getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             getActivity().startService(playIntent);
         }
-        setController();
         super.onStart();
     }
 
@@ -110,7 +112,7 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
     public void onResume() {
         super.onResume();
         if(paused){
-            setController();
+            //setController();
             paused=false;
         }
     }
@@ -121,16 +123,17 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         super.onStop();
     }
 
+    //ServiceConnection for binding MusicService to MainActivity
     public ServiceConnection  musicConnection = new ServiceConnection(){
 
+        //Gets executed when connection to service is made
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
-            //get service
-            musicSrv = binder.getService();
+            musicSrv = binder.getService();      //get service
             Log.d("check", "Service connected");
-            //pass list
-            musicSrv.setList(songList);
+
+            musicSrv.setList(songList);         //pass Song list to the service
             musicBound = true;
         }
 
@@ -140,10 +143,20 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         }
     };
 
+/*---- MediaPlayerControl Implemented Methods ----*/
+
+    @Override
+    public void start() {
+        playbackPaused=false;
+        musicSrv.startPlayer();
+        controller.show(0);
+    }
+
     @Override
     public void pause() {
         playbackPaused=true;
         musicSrv.pausePlayer();
+        controller.show(0);
     }
 
     @Override
@@ -152,28 +165,23 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
     }
 
     @Override
-    public void start() {
-        musicSrv.go();
-    }
-
-    @Override
     public int getDuration() {
-        if(musicSrv!=null && musicBound && musicSrv.isPng())
+        if(musicSrv!=null && musicBound && musicSrv.isPlaying())
             return musicSrv.getDur();
         else return 0;
     }
 
     @Override
     public int getCurrentPosition() {
-        if(musicSrv!=null && musicBound && musicSrv.isPng())
-            return musicSrv.getPosn();
+        if(musicSrv!=null && musicBound && musicSrv.isPlaying())
+            return musicSrv.getPosition();
         else return 0;
     }
 
     @Override
     public boolean isPlaying() {
         if(musicSrv!=null && musicBound)
-            return musicSrv.isPng();
+            return musicSrv.isPlaying();
         return false;
     }
 
@@ -202,10 +210,10 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         return 0;
     }
 
+    //set the controller up
     private void setController(){
-        //set the controller up
-        controller = new MusicController(getActivity());
 
+        controller = new MusicController(getActivity());
         controller.setPrevNextListeners(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -217,12 +225,10 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
                 playPrev();
             }
         });
-        Log.e("check", view.findViewById(R.id.song_list).toString());
+
         controller.setMediaPlayer(this);
         controller.setAnchorView(view.findViewById(R.id.song_list));
-        //controller.setEnabled(true);
         controller.setEnabled(true);
-        controller.show();
     }
 
     //play next
@@ -245,13 +251,4 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         controller.show(0);
     }
 
-    public void songPicked(View view){
-        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
-        musicSrv.playSong();
-        if(playbackPaused){
-            setController();
-            playbackPaused=false;
-        }
-        controller.show(0);
-    }
 }
