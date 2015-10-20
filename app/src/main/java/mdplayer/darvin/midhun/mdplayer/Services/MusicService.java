@@ -37,7 +37,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onCreate() {
-        Log.e("check","service has started");
+        Log.e("check", "service has started");
         //create the service
         super.onCreate();
         //initialize position
@@ -107,11 +107,15 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-
+        if(player.getCurrentPosition()>0){
+            player.reset();
+            playNext();
+        }
     }
 
     @Override
     public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+        player.reset();
         return false;
     }
 
@@ -148,7 +152,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         return player.getCurrentPosition();
     }
 
-    public int getDur(){
+    public int getDur() {
         return player.getDuration();
     }
 
@@ -185,4 +189,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void onDestroy() {
         stopForeground(true);
     }
+
+
+
 }

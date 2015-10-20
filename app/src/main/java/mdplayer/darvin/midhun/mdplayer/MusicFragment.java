@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -34,7 +36,10 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
     private Intent playIntent;
     public boolean musicBound=false;
 
+    private boolean paused=false, playbackPaused=false;
+
     private MusicController controller;
+    private Handler handler = new Handler();
 
     public MusicFragment() {
         // Required empty public constructor
@@ -95,6 +100,26 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         super.onStart();
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
+        paused=true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(paused){
+            setController();
+            paused=false;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        controller.hide();
+        super.onStop();
+    }
 
     public ServiceConnection  musicConnection = new ServiceConnection(){
 
@@ -117,6 +142,7 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
 
     @Override
     public void pause() {
+        playbackPaused=true;
         musicSrv.pausePlayer();
     }
 
@@ -191,21 +217,41 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
                 playPrev();
             }
         });
-        Log.e("check",view.findViewById(R.id.song_list).toString());
+        Log.e("check", view.findViewById(R.id.song_list).toString());
         controller.setMediaPlayer(this);
         controller.setAnchorView(view.findViewById(R.id.song_list));
+        //controller.setEnabled(true);
         controller.setEnabled(true);
+        controller.show();
     }
 
     //play next
     private void playNext(){
         musicSrv.playNext();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
         controller.show(0);
     }
 
     //play previous
     private void playPrev(){
         musicSrv.playPrev();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
+
+    public void songPicked(View view){
+        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
+        musicSrv.playSong();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
         controller.show(0);
     }
 }
