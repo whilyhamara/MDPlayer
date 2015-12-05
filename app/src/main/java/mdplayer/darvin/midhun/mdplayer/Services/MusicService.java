@@ -16,21 +16,22 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import mdplayer.darvin.midhun.mdplayer.MainActivity;
+import mdplayer.darvin.midhun.mdplayer.MusicController;
 import mdplayer.darvin.midhun.mdplayer.R;
 import mdplayer.darvin.midhun.mdplayer.Song;
 
 public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,MediaPlayer.OnCompletionListener{
 
-    //media player
     public MediaPlayer player;
-    //song list
     private ArrayList<Song> songs;
-    //current position
+
     private int songPosn;
     private String songTitle="";
     private static final int NOTIFY_ID=1;
 
     private final IBinder musicBind = new MusicBinder();
+
+    public MusicController controller;
 
     public MusicService() {
     }
@@ -121,9 +122,9 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
-
         //start playback
         player.start();
+        controller.show(0);
 
         Intent notIntent = new Intent(this, MainActivity.class);
         notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -83,13 +83,16 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
     }
 
     public void songPicked(View view){
-        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
-        musicSrv.playSong();
+
         if(playbackPaused){
             setController();
             playbackPaused=false;
         }
-        controller.show(0);
+
+        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
+        musicSrv.playSong();
+
+        controller.show();
     }
 
     @Override
@@ -134,6 +137,7 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
             Log.d("check", "Service connected");
 
             musicSrv.setList(songList);         //pass Song list to the service
+            musicSrv.controller = controller;
             musicBound = true;
         }
 
@@ -212,8 +216,11 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
 
     //set the controller up
     private void setController(){
+        if(controller == null)
+             controller = new MusicController(getActivity());
+        else
+             controller.invalidate();
 
-        controller = new MusicController(getActivity());
         controller.setPrevNextListeners(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
