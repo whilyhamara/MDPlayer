@@ -49,15 +49,8 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         view = inflater.inflate(R.layout.fragment_music, container, false);
 
         songListView = (ListView) view.findViewById(R.id.song_list);        // Get reference of ListView in fragment_music layout
-        songList = new ArrayList<Song>();                                   // Create a new ArrayList of Song objects
-        songList = ((MainActivity) getActivity()).songList;                 // Get songs from MainActivity
-
-        //Sorting the song list alphabetically
-        Collections.sort(songList, new Comparator<Song>() {
-            public int compare(Song a, Song b) {
-                return a.getTitle().compareTo(b.getTitle());
-            }
-        });
+        //songList = new ArrayList<Song>();                                   // Create a new ArrayList of Song objects
+        //songList = ((MainActivity) getActivity()).songList;                 // Get songs from MainActivity
 
         //Setting the songAdapter to the list View
         SongAdapter songAdt = new SongAdapter(getActivity(), songList);
@@ -126,7 +119,8 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
         super.onStop();
     }
 
-    //ServiceConnection for binding MusicService to MainActivity
+/*---- ServiceConnection for binding MusicService to MainActivity  ----*/
+
     public ServiceConnection  musicConnection = new ServiceConnection(){
 
         //Gets executed when connection to service is made
@@ -160,7 +154,7 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
     public void pause() {
         playbackPaused=true;
         musicSrv.pausePlayer();
-        controller.show(0);
+        //controller.show(0);
     }
 
     @Override
@@ -170,14 +164,14 @@ public class MusicFragment extends Fragment implements MediaController.MediaPlay
 
     @Override
     public int getDuration() {
-        if(musicSrv!=null && musicBound && musicSrv.isPlaying())
+        if(musicSrv!=null && musicBound && isPlaying())
             return musicSrv.getDur();
         else return 0;
     }
 
     @Override
     public int getCurrentPosition() {
-        if(musicSrv!=null && musicBound && musicSrv.isPlaying())
+        if(musicSrv!=null && musicBound && isPlaying())
             return musicSrv.getPosition();
         else return 0;
     }

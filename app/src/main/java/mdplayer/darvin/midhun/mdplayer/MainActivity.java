@@ -26,6 +26,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import mdplayer.darvin.midhun.mdplayer.Services.MusicService;
 
@@ -63,6 +65,14 @@ public class MainActivity extends AppCompatActivity {
         songList = new ArrayList<Song>();
 
         getSongList();
+
+        //Sorting the song list alphabetically
+        Collections.sort(songList, new Comparator<Song>() {
+            public int compare(Song a, Song b) {
+                return a.getTitle().compareTo(b.getTitle());
+            }
+        });
+
         //Initializing the Fragments
         homeFragment = new HomeFragment();
         profileFragment = new ProfileFragment();
@@ -70,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
         musicFragment = new MusicFragment();
         settingsFragment = new SettingsFragment();
         fragmentManager = getSupportFragmentManager();
+
+        musicFragment.songList = songList;
 
         // add fragment to the fragment container layout
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_container, homeFragment).commit();
